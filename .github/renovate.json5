@@ -1,0 +1,4 @@
+{
+  extends: ['github>ShenQingchuan/renovate-config'],
+  automerge: true,
+}

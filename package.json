@@ -22,7 +22,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "vpm": "./dist/index.js"
+  },
   "files": [
+    "README.md",
     "dist"
   ],
   "publishConfig": {

@@ -1,6 +1,6 @@
 import type { CommandSetupFn } from '../../types'
 import { writeFile } from 'node:fs/promises'
-import { exit } from 'node:process'
+import { exit, cwd as getCwd } from 'node:process'
 import generate from '@babel/generator'
 import { log, spinner } from '@clack/prompts'
 import { ColorStr } from '../../utils/color-string'
@@ -52,6 +52,6 @@ export const vpmInstall: CommandSetupFn = ({ program }) => {
     .description('Install a plugin with given package name')
     .argument('<name>', 'the name of the plugin')
     .action(async (name) => {
-      installPlugin(name)
+      installPlugin({ name, cwd: getCwd() })
     })
 }

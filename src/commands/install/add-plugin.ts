@@ -41,13 +41,12 @@ export async function addPlugin({ viteConfigAST, configObject, pluginName }: {
 
   // Find the last import statement in the file,
   // and append the new import statement after it
-  const lastImportStmt = viteConfigAST.program.body.findLast(stmt => stmt.type === 'ImportDeclaration')
-  if (lastImportStmt) {
-    viteConfigAST.program.body.splice(viteConfigAST.program.body.indexOf(lastImportStmt), 0, importStmt)
+  const lastImportStmtIndex = viteConfigAST.program.body.findLastIndex(stmt => stmt.type === 'ImportDeclaration')
+  if (lastImportStmtIndex !== -1) {
+    viteConfigAST.program.body.splice(lastImportStmtIndex + 1, 0, importStmt)
   }
   else {
-    // Append after all top comments (line/block)
-
+    viteConfigAST.program.body.unshift(importStmt)
   }
 
   (pluginsField.value as ArrayExpression).elements.push(pluginFactoryCallExpr)

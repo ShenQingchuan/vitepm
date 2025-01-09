@@ -6,10 +6,11 @@ export type CommandSetupFn = (params: {
   program: Command
 }) => void
 
+export interface PluginImportStyle {
+  importType: 'default' | 'named'
+  importName: string
+}
+
 export interface PluginImportStyleRecord {
-  [key: string]: {
-    importType: 'default' | 'named'
-    importName: string
-    defaultOptions: null | Record<string, unknown>
-  }
+  [key: string]: PluginImportStyle
 }

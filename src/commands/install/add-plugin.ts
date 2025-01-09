@@ -1,8 +1,11 @@
-import type { ObjectExpression } from '@babel/types'
+import type { ArrayExpression, ObjectExpression, ObjectProperty } from '@babel/types'
+import type { parseViteConfig } from '../../utils/parse-vite-config'
 import { arrayExpression, identifier, objectProperty } from '@babel/types'
+import { generateImportStmt, generatePluginFactoryCallExpr } from '../../utils/code-generate'
 import { PluginImportStyle } from './plugin-import-style'
 
-export async function addPlugin({ configObject, pluginName }: {
+export async function addPlugin({ viteConfigAST, configObject, pluginName }: {
+  viteConfigAST: Awaited<ReturnType<typeof parseViteConfig>>
   configObject: ObjectExpression
   pluginName: string
 }) {
@@ -13,13 +16,16 @@ export async function addPlugin({ configObject, pluginName }: {
     property.type === 'ObjectProperty'
     && property.key.type === 'Identifier'
     && property.key.name === 'plugins'
-  ))
+  )) as (ObjectProperty | undefined)
   if (!pluginsField) {
     pluginsField = objectProperty(
       identifier('plugins'),
       arrayExpression([]),
     )
     configObject.properties.push(pluginsField)
+  }
+  else if (pluginsField.value.type !== 'ArrayExpression') {
+    throw new Error('The plugins field must be an array!')
   }
 
   // Each Vite plugin is a function,
@@ -30,5 +36,19 @@ export async function addPlugin({ configObject, pluginName }: {
     throw new Error(`Plugin ${pluginName} is currently not supported!`)
   }
 
-  // const { importType, importName, defaultOptions } = pluginImportStyle
+  const importStmt = generateImportStmt(pluginName, pluginImportStyle)
+  const pluginFactoryCallExpr = generatePluginFactoryCallExpr(pluginImportStyle)
+
+  // Find the last import statement in the file,
+  // and append the new import statement after it
+  const lastImportStmt = viteConfigAST.program.body.findLast(stmt => stmt.type === 'ImportDeclaration')
+  if (lastImportStmt) {
+    viteConfigAST.program.body.splice(viteConfigAST.program.body.indexOf(lastImportStmt), 0, importStmt)
+  }
+  else {
+    // Append after all top comments (line/block)
+
+  }
+
+  (pluginsField.value as ArrayExpression).elements.push(pluginFactoryCallExpr)
 }

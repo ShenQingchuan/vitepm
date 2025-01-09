@@ -1,10 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { cwd } from 'node:process'
 import { parse } from '@babel/parser'
 
-export async function findViteConfig() {
-  const currentDir = cwd()
+export async function findViteConfig({ cwd: currentDir }: { cwd: string }) {
   const configRegex = /^vite\.config\.m?(?:j|t)s$/
 
   const files = await readdir(currentDir)
@@ -17,8 +15,7 @@ export async function findViteConfig() {
   return path.join(currentDir, configFile)
 }
 
-export async function parseViteConfig() {
-  const configPath = await findViteConfig()
+export async function parseViteConfig(configPath: string) {
   const fileContent = await readFile(configPath, 'utf-8')
   const babelAST = parse(
     fileContent,

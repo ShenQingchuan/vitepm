@@ -4,6 +4,9 @@ export const PluginImportStyle: PluginImportStyleRecord = {
   'vite-plugin-inspect': {
     importType: 'default',
     importName: 'Inspect',
-    defaultOptions: null,
+  },
+  'vue-vine/vite': {
+    importType: 'named',
+    importName: 'VineVitePlugin',
   },
 }

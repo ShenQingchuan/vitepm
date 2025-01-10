@@ -4,6 +4,7 @@ export default antfu(
   {
     ignores: [
       'fixtures/**/*',
+      'tests/fixtures/**/*',
     ],
   },
   {

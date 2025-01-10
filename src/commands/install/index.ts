@@ -5,7 +5,8 @@ import generate from '@babel/generator'
 import { log, spinner } from '@clack/prompts'
 import { ColorStr } from '../../utils/color-string'
 import { findViteConfig, getViteConfigObject, parseViteConfig } from '../../utils/parse-vite-config'
-import { addPlugin } from './add-plugin'
+import { addPluginToAST } from './add-plugin'
+import { checkNpmInstall } from './check-npm-install'
 
 export async function installPlugin({ name, cwd }: {
   name: string
@@ -13,6 +14,9 @@ export async function installPlugin({ name, cwd }: {
 }) {
   try {
     log.info(`Installing plugin ${ColorStr.new(name).green().bold().toString()} ...`)
+
+    // Check if the plugin is already installed in `node_modules`
+    await checkNpmInstall({ name, cwd })
 
     const loadConfigSpinner = spinner()
     loadConfigSpinner.start('Loading Vite config file ...')
@@ -24,7 +28,7 @@ export async function installPlugin({ name, cwd }: {
     // user may use `defineConfig` helper or directly write an object literal
     const configObject = getViteConfigObject(viteConfigAST)
 
-    await addPlugin({ viteConfigAST, configObject, pluginName: name })
+    await addPluginToAST({ viteConfigAST, configObject, pluginName: name })
 
     // Hack for '@babel/generator':
     const runGenerate = (

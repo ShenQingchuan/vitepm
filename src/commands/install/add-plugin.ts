@@ -4,7 +4,7 @@ import { arrayExpression, identifier, objectProperty } from '@babel/types'
 import { generateImportStmt, generatePluginFactoryCallExpr } from '../../utils/code-generate'
 import { PluginImportStyle } from './plugin-import-style'
 
-export async function addPlugin({ viteConfigAST, configObject, pluginName }: {
+export async function addPluginToAST({ viteConfigAST, configObject, pluginName }: {
   viteConfigAST: Awaited<ReturnType<typeof parseViteConfig>>
   configObject: ObjectExpression
   pluginName: string

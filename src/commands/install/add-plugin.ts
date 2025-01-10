@@ -1,7 +1,10 @@
 import type { ArrayExpression, ObjectExpression, ObjectProperty } from '@babel/types'
 import type { parseViteConfig } from '../../utils/parse-vite-config'
+import { exit } from 'node:process'
 import { arrayExpression, identifier, objectProperty } from '@babel/types'
+import { log } from '@clack/prompts'
 import { generateImportStmt, generatePluginFactoryCallExpr } from '../../utils/code-generate'
+import { ColorStr } from '../../utils/color-string'
 import { PluginImportStyle } from './plugin-import-style'
 
 export async function addPluginToAST({ viteConfigAST, configObject, pluginName }: {
@@ -34,6 +37,18 @@ export async function addPluginToAST({ viteConfigAST, configObject, pluginName }
   const pluginImportStyle = PluginImportStyle[pluginName]
   if (!pluginImportStyle) {
     throw new Error(`Plugin ${pluginName} is currently not supported!`)
+  }
+
+  // Check if the plugin already exists in the plugins array
+  const pluginsArray = pluginsField.value as ArrayExpression
+  const isPluginExists = pluginsArray.elements.find(element => (
+    element?.type === 'CallExpression'
+    && element.callee.type === 'Identifier'
+    && element.callee.name === pluginImportStyle.importName
+  ))
+  if (isPluginExists) {
+    log.warn(ColorStr.new('Plugin is already installed!').yellow().bold().toString())
+    exit(0)
   }
 
   const importStmt = generateImportStmt(pluginName, pluginImportStyle)

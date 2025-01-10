@@ -18,7 +18,7 @@ You must run `vpm` in a project root directory that contains a Vite config file 
 │
 ●  Installing plugin vite-plugin-inspect ...
 │
-◇  Vite config file loaded!
+◇  Editing Vite config file...
 │
 ◆  Plugin has been installed!
 ```

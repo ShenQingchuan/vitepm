@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { env } from 'node:process'
-import { select, spinner } from '@clack/prompts'
+import { log, select } from '@clack/prompts'
 
 function getPackageJsonData(cwd: string): Record<string, any> {
   try {
@@ -32,6 +32,7 @@ export async function checkNpmInstall({ name, cwd }: {
 
   // Check if the plugin is already installed
   if (devDependencies[name]) {
+    log.success('Plugin is already downloaded.')
     return
   }
 
@@ -50,8 +51,10 @@ export async function checkNpmInstall({ name, cwd }: {
   )
 
   // Install the plugin
-  const installLoadingSpinner = spinner()
-  installLoadingSpinner.start(`Running ${String(packageManager)} install ...`)
-  execSync(`${String(packageManager)} install -D ${name}`, { cwd })
-  installLoadingSpinner.stop('Plugin package downloaded!')
+  log.info(`Running ${String(packageManager)} install ...`)
+  execSync(`${String(packageManager)} install -D ${name}`, {
+    cwd,
+    stdio: 'inherit',
+  })
+  log.success('Plugin package downloaded!')
 }

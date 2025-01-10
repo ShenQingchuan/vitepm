@@ -2,7 +2,7 @@ import type { CommandSetupFn } from '../../types'
 import { writeFile } from 'node:fs/promises'
 import { exit, cwd as getCwd } from 'node:process'
 import generate from '@babel/generator'
-import { log, spinner } from '@clack/prompts'
+import { log } from '@clack/prompts'
 import { ColorStr } from '../../utils/color-string'
 import { findViteConfig, getViteConfigObject, parseViteConfig } from '../../utils/parse-vite-config'
 import { addPluginToAST } from './add-plugin'
@@ -18,11 +18,9 @@ export async function installPlugin({ name, cwd }: {
     // Check if the plugin is already installed in `node_modules`
     await checkNpmInstall({ name, cwd })
 
-    const loadConfigSpinner = spinner()
-    loadConfigSpinner.start('Loading Vite config file ...')
+    log.info('Editing Vite config file...')
     const viteConfigPath = await findViteConfig({ cwd })
     const viteConfigAST = await parseViteConfig(viteConfigPath)
-    loadConfigSpinner.stop('Vite config file loaded!')
 
     // Vite config file's default export is the config object,
     // user may use `defineConfig` helper or directly write an object literal

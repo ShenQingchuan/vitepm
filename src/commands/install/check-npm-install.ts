@@ -19,6 +19,8 @@ export async function checkNpmInstall({ name, cwd }: {
   name: string
   cwd: string
 }) {
+  const isTest = env.VITEST_ENV === 'true'
+
   // Read current directory's `package.json`
   const packageJson = getPackageJsonData(cwd)
 
@@ -38,7 +40,7 @@ export async function checkNpmInstall({ name, cwd }: {
 
   // Ask user to select a package manager
   const packageManager = (
-    env.VITEST_ENV === 'true'
+    isTest
       ? 'pnpm'
       : await select({
         message: 'Pick a package manager.',
@@ -54,7 +56,7 @@ export async function checkNpmInstall({ name, cwd }: {
   log.info(`Running ${String(packageManager)} install ...`)
   execSync(`${String(packageManager)} install -D ${name}`, {
     cwd,
-    stdio: 'inherit',
+    stdio: isTest ? 'ignore' : 'inherit',
   })
   log.success('Plugin package downloaded!')
 }

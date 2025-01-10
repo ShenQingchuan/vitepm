@@ -44,10 +44,24 @@ export function getViteConfigObject(babelAST: ReturnType<typeof parse>) {
     defaultExportDeclaration.type === 'CallExpression'
     && defaultExportDeclaration.callee.type === 'Identifier'
     && defaultExportDeclaration.callee.name === 'defineConfig'
-    && defaultExportDeclaration.arguments[0].type === 'ObjectExpression'
   ) {
-    // Get the first argument of `defineConfig`
-    return defaultExportDeclaration.arguments[0]
+    const arg0 = defaultExportDeclaration.arguments[0]
+    if (arg0.type === 'ObjectExpression') {
+      // Get the first argument of `defineConfig`
+      return arg0
+    }
+    else if (arg0.type === 'ArrowFunctionExpression') {
+      const body = arg0.body
+      if (body.type === 'ObjectExpression') {
+        return body
+      }
+      else if (body.type === 'BlockStatement') {
+        const returnObj = body.body.find(node => node.type === 'ReturnStatement')
+        if (returnObj && returnObj.argument?.type === 'ObjectExpression') {
+          return returnObj.argument
+        }
+      }
+    }
   }
 
   throw new Error('Failed to find config object!')

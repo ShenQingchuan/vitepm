@@ -1,5 +1,6 @@
 import type { CommandSetupFn } from '../../types'
 import { writeFile } from 'node:fs/promises'
+import { isAbsolute, resolve } from 'node:path'
 import { exit, cwd as getCwd } from 'node:process'
 import generate from '@babel/generator'
 import { log } from '@clack/prompts'
@@ -8,9 +9,10 @@ import { findViteConfig, getViteConfigObject, parseViteConfig } from '../../util
 import { addPluginToAST } from './add-plugin'
 import { checkNpmInstall } from './check-npm-install'
 
-export async function installPlugin({ name, cwd }: {
+export async function installPlugin({ name, cwd, configPath: viteConfigPath }: {
   name: string
   cwd: string
+  configPath?: string
 }) {
   try {
     log.info(`Installing plugin ${ColorStr.new(name).green().bold().toString()} ...`)
@@ -19,7 +21,12 @@ export async function installPlugin({ name, cwd }: {
     await checkNpmInstall({ name, cwd })
 
     log.info('Editing Vite config file...')
-    const viteConfigPath = await findViteConfig({ cwd })
+    if (!viteConfigPath) {
+      viteConfigPath = await findViteConfig({ cwd })
+    }
+    else if (!isAbsolute(viteConfigPath)) {
+      viteConfigPath = resolve(cwd, viteConfigPath)
+    }
     const viteConfigAST = await parseViteConfig(viteConfigPath)
 
     // Vite config file's default export is the config object,
@@ -53,7 +60,8 @@ export const vpmInstall: CommandSetupFn = ({ program }) => {
     .alias('install')
     .description('Install a plugin with given package name')
     .argument('<name>', 'the name of the plugin')
-    .action(async (name) => {
-      installPlugin({ name, cwd: getCwd() })
+    .option('-c, --config <file>', '[string] use specified config file')
+    .action(async (name, options) => {
+      installPlugin({ name, cwd: getCwd(), configPath: options.config })
     })
 }
